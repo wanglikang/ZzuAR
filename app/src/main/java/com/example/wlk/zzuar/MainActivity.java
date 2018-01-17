@@ -9,7 +9,8 @@ import android.os.Bundle;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
-
+    private GLSurfaceView mGLView;
+    private VaryRender render;
     // Used to load the 'native-lib' library on application startup.
     static {
         System.loadLibrary("native-lib");
@@ -18,27 +19,26 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        /setContentView(R.layout.activity_main);
-
+        setContentView(R.layout.activity_main);
+        initGL();
         // Example of a call to a native method
-        TextView tv = (TextView) findViewById(R.id.sample_text);
-
-        GLSurfaceView surfaceview = new GLSurfaceView(this);
-        surfaceview.setEGLContextClientVersion(2);
-
-        surfaceview.setRenderer(new MyRender());
-
-        setContentView(surfaceview);
-        ActivityManager activitymanager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        ConfigurationInfo cfg = activitymanager.getDeviceConfigurationInfo();
-        int glversion = cfg.reqGlEsVersion;
+//        TextView tv = (TextView) findViewById(R.id.sample_text);
+//
+//        GLSurfaceView surfaceview = new GLSurfaceView(this);
+//        surfaceview.setEGLContextClientVersion(2);
+//
+//        surfaceview.setRenderer(new MyRender());
+//
+//        setContentView(surfaceview);
+//        ActivityManager activitymanager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+//        ConfigurationInfo cfg = activitymanager.getDeviceConfigurationInfo();
+//        int glversion = cfg.reqGlEsVersion;
 
 
 
 
 
         //tv.setText(stringFromJNI());
-        int a = (glversion>>16)&0x0000f;
        // tv.setText(a+"");
 
 
@@ -49,4 +49,11 @@ public class MainActivity extends Activity {
      * which is packaged with this application.
      */
     public native String stringFromJNI();
+
+    public void initGL(){
+        mGLView= (GLSurfaceView) findViewById(R.id.mGLView);
+        mGLView.setEGLContextClientVersion(2);
+        mGLView.setRenderer(render=new VaryRender(getResources()));
+        mGLView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+    }
 }
