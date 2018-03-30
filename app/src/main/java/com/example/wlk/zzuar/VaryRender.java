@@ -1,8 +1,10 @@
 package com.example.wlk.zzuar;
 
+import android.content.ContentValues;
 import android.content.res.Resources;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
+import android.renderscript.Sampler;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -24,7 +26,7 @@ public class VaryRender implements GLSurfaceView.Renderer {
 
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-        GLES20.glClearColor(1.0f,1.0f,1.0f,1.0f);
+        GLES20.glClearColor(0.5f,1.0f,1.0f,1.0f);
         //开启深度测试
         GLES20.glEnable(GLES20.GL_DEPTH_TEST);
         cube.create();
@@ -53,25 +55,30 @@ public class VaryRender implements GLSurfaceView.Renderer {
 
         //y轴负方向平移，然后按xyz->(0,0,0)到(1,1,1)旋转30度
         tools.pushMatrix();
+        cube.setMatrix(tools.getFinalMatrix());
+        cube.drawSelf();
+
         tools.translate(0,-3,0);
+        cube.setMatrix(tools.getFinalMatrix());
+        cube.drawSelf();
         tools.rotate(30f,1,1,1);
         cube.setMatrix(tools.getFinalMatrix());
         cube.drawSelf();
         tools.popMatrix();
 
         //x轴负方向平移，然后按xyz->(0,0,0)到(1,-1,1)旋转120度，在放大到0.5倍
-        tools.pushMatrix();
-        tools.translate(-3,0,0);
-        tools.scale(0.5f,0.5f,0.5f);
-
-        //在以上变换的基础上再进行变换
-        tools.pushMatrix();
-        tools.translate(12,0,0);
-        tools.scale(1.0f,2.0f,1.0f);
-        tools.rotate(30f,1,2,1);
-        cube.setMatrix(tools.getFinalMatrix());
-        cube.drawSelf();
-        tools.popMatrix();
+           tools.pushMatrix();
+            tools.translate(-3,0,0);
+            tools.scale(0.5f,0.5f,0.5f);
+//
+//        //在以上变换的基础上再进行变换
+//        tools.pushMatrix();
+//        tools.translate(12,0,0);
+//        tools.scale(1.0f,2.0f,1.0f);
+//        tools.rotate(30f,1,2,1);
+//        cube.setMatrix(tools.getFinalMatrix());
+//        cube.drawSelf();
+//        tools.popMatrix();
 
         //接着被中断的地方执行
         tools.rotate(30f,-1,-1,1);
@@ -80,4 +87,10 @@ public class VaryRender implements GLSurfaceView.Renderer {
         tools.popMatrix();
     }
 
+    public void setCamera(float ex,float ey,float ez,float cx,float cy,float cz,float ux,float uy,float uz){
+        tools.setCamera(ex,ey,ez,cx,cy,cz,ux,uy,uz);
+    }
+    public void changeCamara(int index ,float value){
+        tools.changeCamera(index,value);
+    }
 }
