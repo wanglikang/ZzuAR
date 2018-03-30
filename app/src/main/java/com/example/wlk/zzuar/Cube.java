@@ -37,13 +37,13 @@ public class Cube {
 
     float color[] = {
             0f,1f,0f,1f,
-            0f,1f,0f,1f,
-            0f,1f,0f,1f,
-            0f,1f,0f,1f,
-            1f,0f,0f,1f,
-            1f,0f,0f,1f,
-            1f,0f,0f,1f,
-            1f,0f,0f,1f,
+            0f,0.5f,0f,1f,
+            0f,1f,0.5f,1f,
+            0f,1f,0f,0.5f,
+            0.5f,0f,0f,1f,
+            1f,0.5f,0f,1f,
+            1f,0f,0.5f,1f,
+            1f,0f,0f,0.5f,
     };
 
     private FloatBuffer vertexBuf,colorBuf;
@@ -111,7 +111,10 @@ public class Cube {
                 GLES20.GL_FLOAT,false,
                 0,colorBuf);
         //索引法绘制正方体
-        GLES20.glDrawElements(GLES20.GL_TRIANGLES,index.length, GLES20.GL_UNSIGNED_SHORT,indexBuf);
+        GLES20.glDrawElements(GLES20.GL_TRIANGLES,
+                index.length,
+                GLES20.GL_UNSIGNED_SHORT,
+                indexBuf);
         //禁止顶点数组的句柄
         GLES20.glDisableVertexAttribArray(hVertex);
         GLES20.glDisableVertexAttribArray(hColor);
