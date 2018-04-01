@@ -1,11 +1,13 @@
 package com.example.wlk.zzuar.obj;
 
+import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.example.wlk.zzuar.activity.BaseActivity;
 import com.example.wlk.zzuar.R;
@@ -25,10 +27,12 @@ public class ObjLoadActivity extends BaseActivity {
     private GLSurfaceView mGLView;
     private ObjFilter mFilter;
     private Obj3D obj;
+    private Context context;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        context = this;
         setContentView(R.layout.activity_obj);
         mGLView= (GLSurfaceView) findViewById(R.id.mGLView);
         mGLView.setEGLContextClientVersion(2);
@@ -67,12 +71,12 @@ public class ObjLoadActivity extends BaseActivity {
         mGLView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
         mGLView.setOnClickListener((v)->{
             float[] fa = mFilter.getMatrix();
+
             Log.i("ObjLoadActivity","setOnClickListener");
-            //reDrawSurface(1125,1698);
 
             Matrix.rotateM(fa,0,0.3f,0,1,0);
-            Log.i("ObjLoadActivity",floatArr2String(fa));
-
+            //Log.i("ObjLoadActivity",floatArr2String(fa));
+            Toast.makeText(context,floatArr2String(fa),Toast.LENGTH_SHORT).show();
 //            mFilter.draw();
 
         });
