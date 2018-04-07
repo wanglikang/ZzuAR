@@ -32,6 +32,7 @@ import android.util.TypedValue;
 import android.widget.Toast;
 
 import com.example.wlk.zzuar.Classifier;
+import com.example.wlk.zzuar.Classifier.Recognition;
 import com.example.wlk.zzuar.OverlayView;
 import com.example.wlk.zzuar.R;
 import com.example.wlk.zzuar.TensorFlowMultiBoxDetector;
@@ -291,7 +292,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
           public void run() {
             LOGGER.i("Running detection on image " + currTimestamp);
             final long startTime = SystemClock.uptimeMillis();
-            final List<Classifier.Recognition> results = detector.recognizeImage(croppedBitmap);
+            final List<Recognition> results = detector.recognizeImage(croppedBitmap);
             lastProcessingTimeMs = SystemClock.uptimeMillis() - startTime;
 
             cropCopyBitmap = Bitmap.createBitmap(croppedBitmap);

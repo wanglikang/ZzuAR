@@ -39,6 +39,14 @@ public class MainChooceActivity extends AppCompatActivity {
             }
         });
 
+        bt3 = findViewById(R.id.c_bt2);
+        bt3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, DetectorActivity.class);
+                startActivity(intent);
+            }
+        });
 
     }
 }
