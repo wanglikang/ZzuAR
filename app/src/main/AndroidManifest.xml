@@ -33,7 +33,7 @@
         <activity android:name=".obj.ObjLoadActivity" />
         <activity android:name=".activity.DetectorActivity" />
         <activity android:name=".activity.SensorActivity" />
-        <activity android:name=".activity.testFrameActivity"></activity>
+        <activity android:name=".activity.testFrameActivity"/>
     </application>
 
 </manifest>

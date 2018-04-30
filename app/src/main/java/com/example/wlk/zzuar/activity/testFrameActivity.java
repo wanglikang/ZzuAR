@@ -5,12 +5,14 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
+import com.example.wlk.zzuar.R;
 
 
 public class testFrameActivity extends AppCompatActivity {
 
     private float alpha = (float)1.0;
     private TextView texture;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
