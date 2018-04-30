@@ -25,15 +25,16 @@ import android.graphics.Paint.Join;
 import android.graphics.Paint.Style;
 import android.graphics.RectF;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Pair;
 import android.util.TypedValue;
 import android.widget.Toast;
 
-import com.example.wlk.zzuar.Classifier;
-import com.example.wlk.zzuar.Classifier.Recognition;
-import com.example.wlk.zzuar.util.BorderedText;
-import com.example.wlk.zzuar.util.ImageUtils;
-import com.example.wlk.zzuar.util.Logger;
+import com.example.wlk.zzuar.tf.Classifier;
+import com.example.wlk.zzuar.tf.Classifier.Recognition;
+import com.example.wlk.zzuar.tf.util.BorderedText;
+import com.example.wlk.zzuar.tf.util.ImageUtils;
+import com.example.wlk.zzuar.tf.util.Logger;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -160,6 +161,7 @@ public class MultiBoxTracker {
   public synchronized void trackResults(
           final List<Classifier.Recognition> results, final byte[] frame, final long timestamp) {
     logger.i("Processing %d results from %d", results.size(), timestamp);
+    Log.i("learning", "to processResults()");
     processResults(timestamp, results, frame);
   }
 
@@ -176,7 +178,9 @@ public class MultiBoxTracker {
             (int) (multiplier * (rotated ? frameWidth : frameHeight)),
             sensorOrientation,
             false);
+    Log.i("learning", "MultiBoxTracker -draw()-trackedObjects");
     for (final TrackedRecognition recognition : trackedObjects) {
+
       final RectF trackedPos =
           (objectTracker != null)
               ? recognition.trackedObject.getTrackedPositionInPreviewFrame()
@@ -192,7 +196,7 @@ public class MultiBoxTracker {
           !TextUtils.isEmpty(recognition.title)
               ? String.format("%s %.2f", recognition.title, recognition.detectionConfidence)
               : String.format("%.2f", recognition.detectionConfidence);
-      borderedText.drawText(canvas, trackedPos.left + cornerSize, trackedPos.bottom, labelString);
+      borderedText.drawText(canvas, trackedPos.left + cornerSize, trackedPos.bottom, "title is:"+labelString);
     }
   }
 
@@ -246,8 +250,15 @@ public class MultiBoxTracker {
     }
   }
 
+  /**
+   * 将需要显示的结果对儿显示在屏幕上
+   * @param timestamp　时间戳
+   * @param results　包含类别，位置，置信度的Recognition　集合
+   * @param originalFrame 原始的图像字节数据
+   */
   private void processResults(
           final long timestamp, final List<Recognition> results, final byte[] originalFrame) {
+      Log.i("learning", "processResults()");
     final List<Pair<Float, Recognition>> rectsToTrack = new LinkedList<Pair<Float, Recognition>>();
 
     screenRects.clear();
@@ -281,6 +292,7 @@ public class MultiBoxTracker {
     }
 
     if (objectTracker == null) {
+        Log.i("learning", "objectTracker is null");
       trackedObjects.clear();
       for (final Pair<Float, Recognition> potential : rectsToTrack) {
         final TrackedRecognition trackedRecognition = new TrackedRecognition();
@@ -290,6 +302,7 @@ public class MultiBoxTracker {
         trackedRecognition.title = potential.second.getTitle();
         trackedRecognition.color = COLORS[trackedObjects.size()];
         trackedObjects.add(trackedRecognition);
+        Log.i("learning", "trackedObjects added");
 
         if (trackedObjects.size() >= COLORS.length) {
           break;
@@ -300,10 +313,17 @@ public class MultiBoxTracker {
 
     logger.i("%d rects to track", rectsToTrack.size());
     for (final Pair<Float, Recognition> potential : rectsToTrack) {
-      handleDetection(originalFrame, timestamp, potential);
+      //handleDetection(originalFrame, timestamp, potential);
+        Log.i("learning", "comment handleDetection()");
     }
   }
 
+    /**
+     * 此函数应该是通过异步的方法通过将识别出来的位置信息在view中进行绘制
+     * @param frameCopy　此参数应该是要显示的图像数组
+     * @param timestamp　时间戳
+     * @param potential　潜在的要显示的＜置信度,矩形位置信息＞Pair集合
+     */
   private void handleDetection(
       final byte[] frameCopy, final long timestamp, final Pair<Float, Recognition> potential) {
     final ObjectTracker.TrackedObject potentialObject =

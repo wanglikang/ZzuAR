@@ -13,7 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-package com.example.wlk.zzuar;
+package com.example.wlk.zzuar.tf;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -22,7 +22,9 @@ import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
 
-import com.example.wlk.zzuar.Classifier.Recognition;
+import com.example.wlk.zzuar.tf.Classifier;
+import com.example.wlk.zzuar.tf.Classifier.Recognition;
+import com.example.wlk.zzuar.tf.ResultsView;
 
 import java.util.List;
 

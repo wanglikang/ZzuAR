@@ -23,8 +23,8 @@ import android.graphics.PointF;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 
-import com.example.wlk.zzuar.util.Logger;
-import com.example.wlk.zzuar.util.Size;
+import com.example.wlk.zzuar.tf.util.Logger;
+import com.example.wlk.zzuar.tf.util.Size;
 
 import java.util.ArrayList;
 import java.util.HashMap;

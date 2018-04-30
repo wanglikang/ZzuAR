@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+    tools:context=".activity.testFrameActivity">
+
+
+
+<View
+    android:layout_width="match_parent"
+    android:background="@color/colorAccent"
+    android:layout_height="match_parent"
+    android:alpha="0.5"/>
+<View
+    android:layout_width="300dp"
+    android:background="@color/colorPrimary"
+    android:layout_height="300dp"/>
+
+
+    <TextView
+        android:id="@+id/texture"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:text="this is some text"
+        android:textColor="ff1123"
+        android:background="#12abcd"
+        android:alpha="0.001"/>
+
+</FrameLayout>

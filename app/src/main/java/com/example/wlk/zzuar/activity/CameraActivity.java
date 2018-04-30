@@ -35,18 +35,19 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Trace;
+import android.util.Log;
 import android.util.Size;
 import android.view.KeyEvent;
 import android.view.Surface;
 import android.view.WindowManager;
 import android.widget.Toast;
 
-import com.example.wlk.zzuar.CameraConnectionFragment;
-import com.example.wlk.zzuar.LegacyCameraConnectionFragment;
-import com.example.wlk.zzuar.OverlayView;
 import com.example.wlk.zzuar.R;
-import com.example.wlk.zzuar.util.ImageUtils;
-import com.example.wlk.zzuar.util.Logger;
+import com.example.wlk.zzuar.tf.CameraConnectionFragment;
+import com.example.wlk.zzuar.tf.LegacyCameraConnectionFragment;
+import com.example.wlk.zzuar.tf.OverlayView;
+import com.example.wlk.zzuar.tf.util.ImageUtils;
+import com.example.wlk.zzuar.tf.util.Logger;
 
 import java.nio.ByteBuffer;
 
@@ -110,6 +111,7 @@ public abstract class CameraActivity extends Activity
    */
   @Override
   public void onPreviewFrame(final byte[] bytes, final Camera camera) {
+    Log.i("learning", "in OnPreviewFrame()");
     if (isProcessingFrame) {
       LOGGER.w("Dropping frame!");
       return;
@@ -119,6 +121,7 @@ public abstract class CameraActivity extends Activity
       // Initialize the storage bitmaps once when the resolution is known.
       if (rgbBytes == null) {
         Camera.Size previewSize = camera.getParameters().getPreviewSize();
+        Log.i("learing", previewSize.height+":"+previewSize.width);
         previewHeight = previewSize.height;
         previewWidth = previewSize.width;
         rgbBytes = new int[previewWidth * previewHeight];
@@ -158,6 +161,7 @@ public abstract class CameraActivity extends Activity
    */
   @Override
   public void onImageAvailable(final ImageReader reader) {
+    Log.i("learning", "in onImageAvailable()");
     //We need wait until we have some size from onPreviewSizeChosen
     if (previewWidth == 0 || previewHeight == 0) {
       return;
@@ -345,6 +349,8 @@ public abstract class CameraActivity extends Activity
             || isHardwareLevelSupported(characteristics, 
                                         CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_FULL);
         LOGGER.i("Camera API lv2?: %s", useCamera2API);
+        Log.i("learning", "isuse camera2api:"+useCamera2API);
+
         return cameraId;
       }
     } catch (CameraAccessException e) {
@@ -383,6 +389,7 @@ public abstract class CameraActivity extends Activity
       fragment =
           new LegacyCameraConnectionFragment(this, getLayoutId(), getDesiredPreviewFrameSize());
     }
+
 
     getFragmentManager()
         .beginTransaction()

@@ -11,6 +11,9 @@ import android.widget.Toast;
 
 import com.example.wlk.zzuar.activity.BaseActivity;
 import com.example.wlk.zzuar.R;
+import com.example.wlk.zzuar.obj.Obj3D;
+import com.example.wlk.zzuar.obj.ObjFilter;
+import com.example.wlk.zzuar.obj.ObjReader;
 import com.example.wlk.zzuar.zip.Gl2Utils;
 
 import java.io.IOException;
@@ -35,6 +38,7 @@ public class ObjLoadActivity extends BaseActivity {
         context = this;
         setContentView(R.layout.activity_obj);
         mGLView= (GLSurfaceView) findViewById(R.id.mGLView);
+
         mGLView.setEGLContextClientVersion(2);
         mFilter=new ObjFilter(getResources());
         obj=new Obj3D();
@@ -54,6 +58,7 @@ public class ObjLoadActivity extends BaseActivity {
 
             @Override
             public void onSurfaceChanged(GL10 gl, int width, int height) {
+
                 reSurfaceChanged(width,height);
                 Log.i("SurfaceChange",width+":"+height);
                 Log.i("SurfaceChange","onSurfaceChanged");

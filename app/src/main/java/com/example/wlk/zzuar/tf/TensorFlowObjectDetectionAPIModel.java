@@ -13,14 +13,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-package com.example.wlk.zzuar;
+package com.example.wlk.zzuar.tf;
 
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.RectF;
 import android.os.Trace;
 
-import com.example.wlk.zzuar.util.Logger;
+import com.example.wlk.zzuar.tf.util.Logger;
 
 import org.tensorflow.Graph;
 import org.tensorflow.Operation;

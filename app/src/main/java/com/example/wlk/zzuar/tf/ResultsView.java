@@ -13,9 +13,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-package com.example.wlk.zzuar;
+package com.example.wlk.zzuar.tf;
 
-import com.example.wlk.zzuar.Classifier.Recognition;
+import com.example.wlk.zzuar.tf.Classifier.Recognition;
 
 import java.util.List;
 

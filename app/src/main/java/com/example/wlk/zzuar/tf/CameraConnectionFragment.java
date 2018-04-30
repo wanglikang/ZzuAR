@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.wlk.zzuar;
+package com.example.wlk.zzuar.tf;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -52,7 +52,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.example.wlk.zzuar.util.Logger;
+import com.example.wlk.zzuar.R;
+import com.example.wlk.zzuar.tf.util.Logger;
 
 
 import java.util.ArrayList;

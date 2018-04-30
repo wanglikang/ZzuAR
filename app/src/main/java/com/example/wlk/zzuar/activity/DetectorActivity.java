@@ -27,22 +27,23 @@ import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.media.ImageReader.OnImageAvailableListener;
 import android.os.SystemClock;
+import android.util.Log;
 import android.util.Size;
 import android.util.TypedValue;
 import android.widget.Toast;
 
-import com.example.wlk.zzuar.Classifier;
-import com.example.wlk.zzuar.Classifier.Recognition;
-import com.example.wlk.zzuar.OverlayView;
+import com.example.wlk.zzuar.tf.Classifier;
+import com.example.wlk.zzuar.tf.Classifier.Recognition;
+import com.example.wlk.zzuar.tf.OverlayView;
 import com.example.wlk.zzuar.R;
-import com.example.wlk.zzuar.TensorFlowMultiBoxDetector;
-import com.example.wlk.zzuar.TensorFlowObjectDetectionAPIModel;
-import com.example.wlk.zzuar.TensorFlowYoloDetector;
+import com.example.wlk.zzuar.tf.TensorFlowMultiBoxDetector;
+import com.example.wlk.zzuar.tf.TensorFlowObjectDetectionAPIModel;
+import com.example.wlk.zzuar.tf.TensorFlowYoloDetector;
 import com.example.wlk.zzuar.tracking.MultiBoxTracker;
-import com.example.wlk.zzuar.util.BorderedText;
-import com.example.wlk.zzuar.util.ImageUtils;
-import com.example.wlk.zzuar.util.Logger;
-import com.example.wlk.zzuar.OverlayView.DrawCallback;
+import com.example.wlk.zzuar.tf.util.BorderedText;
+import com.example.wlk.zzuar.tf.util.ImageUtils;
+import com.example.wlk.zzuar.tf.util.Logger;
+import com.example.wlk.zzuar.tf.OverlayView.DrawCallback;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -64,12 +65,10 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
   private static final String MB_OUTPUT_LOCATIONS_NAME = "output_locations/Reshape";
   private static final String MB_OUTPUT_SCORES_NAME = "output_scores/Reshape";
   private static final String MB_MODEL_FILE = "file:///android_asset/multibox_model.pb";
-  private static final String MB_LOCATION_FILE =
-      "file:///android_asset/multibox_location_priors.txt";
+  private static final String MB_LOCATION_FILE = "file:///android_asset/multibox_location_priors.txt";
 
   private static final int TF_OD_API_INPUT_SIZE = 300;
-  private static final String TF_OD_API_MODEL_FILE =
-      "file:///android_asset/ssd_mobilenet_v1_android_export.pb";
+  private static final String TF_OD_API_MODEL_FILE = "file:///android_asset/ssd_mobilenet_v1_android_export.pb";
   private static final String TF_OD_API_LABELS_FILE = "file:///android_asset/coco_labels_list.txt";
 
   // Configuration values for tiny-yolo-voc. Note that the graph is not included with TensorFlow and
@@ -77,7 +76,10 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
   // Graphs and models downloaded from http://pjreddie.com/darknet/yolo/ may be converted e.g. via
   // DarkFlow (https://github.com/thtrieu/darkflow). Sample command:
   // ./flow --model cfg/tiny-yolo-voc.cfg --load bin/tiny-yolo-voc.weights --savepb --verbalise
-  private static final String YOLO_MODEL_FILE = "file:///android_asset/graph-tiny-yolo-voc.pb";
+
+  //private static final String YOLO_MODEL_FILE = "file:///android_asset/graph-tiny-yolo-voc.pb";
+  //private static final String YOLO_MODEL_FILE = "file:///android_asset/DIYdataV3train.pbtxt";
+  private static final String YOLO_MODEL_FILE = "file:///android_asset/yolov2-tiny-voc.pb";
   private static final int YOLO_INPUT_SIZE = 416;
   private static final String YOLO_INPUT_NAME = "input";
   private static final String YOLO_OUTPUT_NAMES = "output";
@@ -89,7 +91,8 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
   private enum DetectorMode {
     TF_OD_API, MULTIBOX, YOLO;
   }
-  private static final DetectorMode MODE = DetectorMode.TF_OD_API;
+  //private static final DetectorMode MODE = DetectorMode.TF_OD_API;
+  private static final DetectorMode MODE = DetectorMode.YOLO;
 
   // Minimum detection confidence to track a detection.
   private static final float MINIMUM_CONFIDENCE_TF_OD_API = 0.6f;
@@ -145,6 +148,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
               YOLO_OUTPUT_NAMES,
               YOLO_BLOCK_SIZE);
       cropSize = YOLO_INPUT_SIZE;
+      LOGGER.i("%s","yolo");
     } else if (MODE == DetectorMode.MULTIBOX) {
       detector =
           TensorFlowMultiBoxDetector.create(
@@ -203,8 +207,14 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
           }
         });
 
+
+    /////这个可以忽略，，是为了在屏幕上显示调试信息用的，，暂时不用分析
     addCallback(
         new DrawCallback() {
+            /**
+             * 应该是给调试信息添加的显示回调函数
+             * @param canvas
+             */
           @Override
           public void drawCallback(final Canvas canvas) {
             if (!isDebug()) {
@@ -232,6 +242,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
               final String[] statLines = statString.split("\n");
               for (final String line : statLines) {
                 lines.add(line);
+                Log.i("learning", line);
               }
             }
             lines.add("");
@@ -242,6 +253,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
             lines.add("Rotation: " + sensorOrientation);
             lines.add("Inference time: " + lastProcessingTimeMs + "ms");
 
+
             borderedText.drawLines(canvas, 10, canvas.getHeight() - 10, lines);
           }
         });
@@ -251,6 +263,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
   @Override
   protected void processImage() {
+      Log.i("learning", "on processImage()");
     ++timestamp;
     final long currTimestamp = timestamp;
     byte[] originalLuminance = getLuminance();
@@ -290,10 +303,12 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         new Runnable() {
           @Override
           public void run() {
+              Log.i("learning", "run in background()");
             LOGGER.i("Running detection on image " + currTimestamp);
             final long startTime = SystemClock.uptimeMillis();
             final List<Recognition> results = detector.recognizeImage(croppedBitmap);
             lastProcessingTimeMs = SystemClock.uptimeMillis() - startTime;
+            Log.i("learning", "run in background():-------"+lastProcessingTimeMs);
 
             cropCopyBitmap = Bitmap.createBitmap(croppedBitmap);
             final Canvas canvas = new Canvas(cropCopyBitmap);
@@ -320,7 +335,10 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
             for (final Classifier.Recognition result : results) {
               final RectF location = result.getLocation();
+
+
               if (location != null && result.getConfidence() >= minimumConfidence) {
+                Log.i("objLocate", result.toString());
                 canvas.drawRect(location, paint);
 
                 cropToFrameTransform.mapRect(location);
@@ -328,8 +346,17 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
                 mappedRecognitions.add(result);
               }
             }
-
+            /////////////////////////////////////
+            final RectF rf = new RectF();
+            rf.set((float)141.0844, (float)73.53844,(float) 279.5152, (float)397.9768);
+            Classifier.Recognition tempresult = new Classifier.Recognition("myclass", "mytitle",(float)0.76, rf);
+            canvas.drawRect(rf, paint);
+            mappedRecognitions.add(tempresult);
+            /////////////////
+            ///////////////////////////////////
+            //////将结果送到了需要显示的view:MultiBoxTracker
             tracker.trackResults(mappedRecognitions, luminanceCopy, currTimestamp);
+            Log.i("learning", "tracker.trackResults()");
             trackingOverlay.postInvalidate();
 
             requestRender();

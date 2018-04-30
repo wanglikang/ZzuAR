@@ -15,6 +15,8 @@ public class MainChooceActivity extends AppCompatActivity {
     private Button bt1 ;
     private Button bt2 ;
     private Button bt3 ;
+    private Button bt4 ;
+    private Button bt5 ;
     private Context context;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,11 +41,19 @@ public class MainChooceActivity extends AppCompatActivity {
             }
         });
 
-        bt3 = findViewById(R.id.c_bt2);
+        bt3 = findViewById(R.id.c_bt3);
         bt3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(context, DetectorActivity.class);
+                startActivity(intent);
+            }
+        });
+        bt4 = findViewById(R.id.c_bt4);
+        bt4.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, testFrameActivity.class);
                 startActivity(intent);
             }
         });

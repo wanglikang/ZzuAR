@@ -13,15 +13,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-package com.example.wlk.zzuar;
+package com.example.wlk.zzuar.tf;
 
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.RectF;
 import android.os.Trace;
+import android.util.Log;
+import android.widget.Toast;
 
-import com.example.wlk.zzuar.util.Logger;
-import com.example.wlk.zzuar.util.SplitTimer;
+import com.example.wlk.zzuar.myapp;
+import com.example.wlk.zzuar.tf.util.Logger;
+import com.example.wlk.zzuar.tf.util.SplitTimer;
 
 import org.tensorflow.contrib.android.TensorFlowInferenceInterface;
 
@@ -32,6 +35,7 @@ import java.util.PriorityQueue;
 
 /** An object detector that uses TF and a YOLO model to detect objects. */
 public class TensorFlowYoloDetector implements Classifier {
+  private static final String TAG="TensorFlowYoloDetector";
   private static final Logger LOGGER = new Logger();
 
   // Only return this many results with at least this confidence.
@@ -97,6 +101,13 @@ public class TensorFlowYoloDetector implements Classifier {
       final String inputName,
       final String outputName,
       final int blockSize) {
+    Log.i(TAG, "On"+TAG+"create():modelFilename:"+modelFilename+
+            "inputSize:"+inputSize+
+            "inputName:"+inputName+
+            "outputName:"+outputName+
+            "blockSize:"+blockSize);
+
+
     TensorFlowYoloDetector d = new TensorFlowYoloDetector();
     d.inputName = inputName;
     d.inputSize = inputSize;
@@ -177,9 +188,7 @@ public class TensorFlowYoloDetector implements Classifier {
 
     // Find the best detections.
     final PriorityQueue<Recognition> pq =
-        new PriorityQueue<Recognition>(
-            1,
-            new Comparator<Recognition>() {
+        new PriorityQueue<Recognition>(1, new Comparator<Recognition>() {
               @Override
               public int compare(final Recognition lhs, final Recognition rhs) {
                 // Intentionally reversed to put high confidence at the head of the queue.
