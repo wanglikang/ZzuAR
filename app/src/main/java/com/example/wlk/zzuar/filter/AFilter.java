@@ -9,6 +9,7 @@ package com.example.wlk.zzuar.filter;
 
 import android.content.res.Resources;
 import android.opengl.GLES20;
+import android.opengl.Matrix;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -20,6 +21,7 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import java.util.Arrays;
+import java.util.Stack;
 
 /**
  * Description:
@@ -31,6 +33,11 @@ public abstract class AFilter {
     public static final int KEY_OUT=0x101;
     public static final int KEY_IN=0x102;
     public static final int KEY_INDEX=0x201;
+
+    /**
+     * 此栈用于保存位置矩阵使用
+     */
+    private Stack<float[]> matrixStack;
 
     public static boolean DEBUG=true;
     /**
@@ -79,6 +86,9 @@ public abstract class AFilter {
     protected int mFlag=0;
 
     private float[] matrix= Arrays.copyOf(OM,16);
+    private float[] cameraMatrix =MatrixUtils.getOriginalMatrix();
+    private float[] projMatrix = MatrixUtils.getOriginalMatrix();
+    private float[] finalMatrix ;
 
     private int textureType=0;      //默认使用Texture2D0
     private int textureId=0;
@@ -98,6 +108,23 @@ public abstract class AFilter {
         1.0f, 1.0f,
     };
 
+    public float[] getCameraMatrix() {
+        return cameraMatrix;
+    }
+
+    public void setCameraMatrix(float[] cameraMatrix) {
+        this.cameraMatrix = cameraMatrix;
+    }
+
+    public float[] getProjMatrix() {
+        return projMatrix;
+    }
+
+    public void setProjMatrix(float[] projMatrix) {
+        this.projMatrix = projMatrix;
+    }
+
+
     private SparseArray<boolean[]> mBools;
     private SparseArray<int[]> mInts;
     private SparseArray<float[]> mFloats;
@@ -105,6 +132,7 @@ public abstract class AFilter {
     public AFilter(Resources mRes){
         this.mRes=mRes;
         initBuffer();
+        matrixStack = new Stack<float[]>();
     }
 
     public final void create(){
@@ -116,11 +144,15 @@ public abstract class AFilter {
     }
 
     public void draw(){
-        onClear();
+        //为了可以同时多画多个物体
+        //onClear();
         onUseProgram();
         onSetExpandData();
         onBindTexture();
         onDraw();
+    }
+    public void clearView(){
+        onClear();
     }
 
     public void setMatrix(float[] matrix){
@@ -249,6 +281,7 @@ public abstract class AFilter {
         GLES20.glVertexAttribPointer(mHPosition,2, GLES20.GL_FLOAT, false, 0,mVerBuffer);
         GLES20.glEnableVertexAttribArray(mHCoord);
         GLES20.glVertexAttribPointer(mHCoord, 2, GLES20.GL_FLOAT, false, 0, mTexBuffer);
+
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP,0,4);
         GLES20.glDisableVertexAttribArray(mHPosition);
         GLES20.glDisableVertexAttribArray(mHCoord);
@@ -258,7 +291,9 @@ public abstract class AFilter {
      * 清除画布
      */
     protected void onClear(){
-        GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+//        GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        //全０是为了使之具有半透明的功能
+        GLES20.glClearColor(0f,0f,0f,0f);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
     }
 
@@ -266,7 +301,8 @@ public abstract class AFilter {
      * 设置其他扩展数据
      */
     protected void onSetExpandData(){
-        GLES20.glUniformMatrix4fv(mHMatrix,1,false,matrix,0);
+        GLES20.glUniformMatrix4fv(mHMatrix,1,false,
+                getFinalMatrix(),0);
     }
 
     /**
@@ -289,10 +325,10 @@ public abstract class AFilter {
         StringBuilder result=new StringBuilder();
         try{
             InputStream is=mRes.getAssets().open(path);
-            int ch;
+            int len;
             byte[] buffer=new byte[1024];
-            while (-1!=(ch=is.read(buffer))){
-                result.append(new String(buffer,0,ch));
+            while (-1!=(len=is.read(buffer))){
+                result.append(new String(buffer,0,len));
             }
         }catch (Exception e){
             return null;
@@ -307,6 +343,7 @@ public abstract class AFilter {
         int fragment=uLoadShader(GLES20.GL_FRAGMENT_SHADER,fragmentSource);
         if(fragment==0)return 0;
         int program= GLES20.glCreateProgram();
+
         if(program!=0){
             GLES20.glAttachShader(program,vertex);
             GLES20.glAttachShader(program,fragment);
@@ -341,4 +378,23 @@ public abstract class AFilter {
     }
 
 
+    public float[] getFinalMatrix(){
+        StringBuilder sb = new StringBuilder();
+        finalMatrix = new float[16];
+        Matrix.multiplyMM(finalMatrix, 0, cameraMatrix,0 , matrix, 0);
+        Matrix.multiplyMM(finalMatrix, 0, projMatrix,0 , finalMatrix, 0);
+
+        return finalMatrix;
+    }
+    public float[] popMatrix(){
+        float[] peekele = matrixStack.peek();
+        for(int i = 0;i<16;i++){
+            this.matrix[i] = peekele[i];
+        }
+        return matrixStack.pop();
+    }
+    public void pushMatrix(){
+        float[] pushEle = Arrays.copyOf(this.matrix, 16);
+        matrixStack.push(pushEle);
+    }
 }

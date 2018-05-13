@@ -71,7 +71,7 @@ public class ObjFilter extends AFilter {
     }
 
     @Override
-    protected void onSizeChanged(int width, int height) {
+    public void onSizeChanged(int width, int height) {
         GLES20.glViewport(0,0,width,height);
     }
 

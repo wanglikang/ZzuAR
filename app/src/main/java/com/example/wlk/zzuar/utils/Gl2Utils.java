@@ -5,7 +5,7 @@
  * Created by Wuwang on 2016/11/17
  * Copyright © 2016年 深圳哎吖科技. All rights reserved.
  */
-package com.example.wlk.zzuar.zip;
+package com.example.wlk.zzuar.utils;
 
 import android.content.res.Resources;
 import android.opengl.GLES20;

@@ -16,6 +16,9 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.util.Log;
 
+import com.example.wlk.zzuar.filter.AFilter;
+import com.example.wlk.zzuar.utils.Gl2Utils;
+
 
 /**
  * Description:

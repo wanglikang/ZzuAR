@@ -18,7 +18,7 @@
         android:id="@+id/texture"
         android:layout_width="match_parent"
         android:layout_height="100dp"
-        android:text="this is some text"
+        android:text="this is somedf text"
         android:textColor="#ff1123"
         android:background="#12abcd"
         android:alpha="0.001"/>

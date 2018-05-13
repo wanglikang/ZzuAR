@@ -8,7 +8,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
 import com.example.wlk.zzuar.R;
-import com.example.wlk.zzuar.zip.Gl2Utils;
+import com.example.wlk.zzuar.utils.Gl2Utils;
 
 import java.util.ArrayList;
 import java.util.List;

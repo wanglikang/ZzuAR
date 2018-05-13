@@ -7,9 +7,6 @@ import java.util.Arrays;
 import java.util.Stack;
 import java.util.logging.Level;
 
-/**
- * Created by wuwang on 2016/10/30
- */
 
 public class VaryTools {
 
