@@ -78,7 +78,7 @@ public class MultiBoxTracker {
 
     final List<Pair<Float, RectF>> screenRects = new LinkedList<Pair<Float, RectF>>();
 
-    private static class TrackedRecognition {
+    public static class TrackedRecognition {
         ObjectTracker.TrackedObject trackedObject;
         RectF location;
         float detectionConfidence;
@@ -194,12 +194,17 @@ public class MultiBoxTracker {
         final RectF rf = new RectF();
         rf.set(20.f, 30f, 100f, 200f);
         getFrameToCanvasMatrix().mapRect(rf);
-        android.util.Pair<RectF, Integer> fakep = new android.util.Pair<>(rf, 20);
+
         final float cornerSize2 = Math.min(rf.width(), rf.height()) / 8.0f;
-        boxPaint.setColor(COLORS[2]);
+        boxPaint.setColor(COLORS[3]);
         canvas.drawRoundRect(rf, cornerSize2, cornerSize2, boxPaint);
         borderedText.drawText(canvas, rf.left + cornerSize2, rf.bottom, "fake OBJ");
-        glview.addObjList(fakep);
+        mGLSurfaceView.ObjInfo objInfotemp  = glview.new ObjInfo();
+        objInfotemp.lifetime = 20;
+        objInfotemp.location = rf;
+        objInfotemp.objname = "hat";
+        glview.addObjList(objInfotemp);
+
 //////////////////////////////
         for (final TrackedRecognition recognition : trackedObjects) {
             final RectF trackedPos = (objectTracker != null)
@@ -211,10 +216,13 @@ public class MultiBoxTracker {
 
             final float cornerSize = Math.min(trackedPos.width(), trackedPos.height()) / 8.0f;
             canvas.drawRoundRect(trackedPos, cornerSize, cornerSize, boxPaint);
-            /////////////////////////////////////////////////////
-
+            mGLSurfaceView.ObjInfo objInfo  = glview.new ObjInfo();
+            objInfo.lifetime = 20;
+            objInfo.location = trackedPos;
+            objInfo.objname = recognition.title;
+            ////////////////////////////////////////////////////
             android.util.Pair<RectF, Integer> p = new android.util.Pair<>(trackedPos, 20);
-            glview.addObjList(p);
+            glview.addObjList(objInfo);
 
 
             final String labelString = !TextUtils.isEmpty(recognition.title)

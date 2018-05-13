@@ -151,6 +151,63 @@ public abstract class AFilter {
         onBindTexture();
         onDraw();
     }
+
+    /**
+     * 清除画布
+     */
+    protected void onClear(){
+//        GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        //全０是为了使之具有半透明的功能
+        GLES20.glClearColor(0f,0f,0f,0f);
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
+    }
+
+
+    protected void onUseProgram(){
+        GLES20.glUseProgram(mProgram);
+    }
+
+
+    /**
+     * 设置其他扩展数据
+     */
+    protected void onSetExpandData(){
+        GLES20.glUniformMatrix4fv(mHMatrix,1,false,
+                getFinalMatrix(),0);
+    }
+
+    /**
+     * 绑定默认纹理
+     */
+    protected void onBindTexture(){
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0+textureType);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,getTextureId());
+        GLES20.glUniform1i(mHTexture,textureType);
+    }
+
+    /**
+     * 启用顶点坐标和纹理坐标进行绘制
+     */
+    protected void onDraw(){
+
+        GLES20.glEnableVertexAttribArray(mHPosition);
+        GLES20.glVertexAttribPointer(mHPosition,2, GLES20.GL_FLOAT, false, 0,mVerBuffer);
+        GLES20.glEnableVertexAttribArray(mHCoord);
+        GLES20.glVertexAttribPointer(mHCoord, 2, GLES20.GL_FLOAT, false, 0, mTexBuffer);
+
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP,0,4);
+        GLES20.glDisableVertexAttribArray(mHPosition);
+        GLES20.glDisableVertexAttribArray(mHCoord);
+    }
+
+
+    public static void glError(int code,Object index){
+        if(DEBUG&&code!=0){
+            Log.e(TAG,"glError:"+code+"---"+index);
+        }
+    }
+
+
     public void clearView(){
         onClear();
     }
@@ -268,59 +325,7 @@ public abstract class AFilter {
         mTexBuffer.position(0);
     }
 
-    protected void onUseProgram(){
-        GLES20.glUseProgram(mProgram);
-    }
-
-    /**
-     * 启用顶点坐标和纹理坐标进行绘制
-     */
-    protected void onDraw(){
-
-        GLES20.glEnableVertexAttribArray(mHPosition);
-        GLES20.glVertexAttribPointer(mHPosition,2, GLES20.GL_FLOAT, false, 0,mVerBuffer);
-        GLES20.glEnableVertexAttribArray(mHCoord);
-        GLES20.glVertexAttribPointer(mHCoord, 2, GLES20.GL_FLOAT, false, 0, mTexBuffer);
-
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP,0,4);
-        GLES20.glDisableVertexAttribArray(mHPosition);
-        GLES20.glDisableVertexAttribArray(mHCoord);
-    }
-
-    /**
-     * 清除画布
-     */
-    protected void onClear(){
-//        GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-        //全０是为了使之具有半透明的功能
-        GLES20.glClearColor(0f,0f,0f,0f);
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-    }
-
-    /**
-     * 设置其他扩展数据
-     */
-    protected void onSetExpandData(){
-        GLES20.glUniformMatrix4fv(mHMatrix,1,false,
-                getFinalMatrix(),0);
-    }
-
-    /**
-     * 绑定默认纹理
-     */
-    protected void onBindTexture(){
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE0+textureType);
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,getTextureId());
-        GLES20.glUniform1i(mHTexture,textureType);
-    }
-
-    public static void glError(int code,Object index){
-        if(DEBUG&&code!=0){
-            Log.e(TAG,"glError:"+code+"---"+index);
-        }
-    }
-
-    //通过路径加载Assets中的文本内容
+      //通过路径加载Assets中的文本内容
     public static String uRes(Resources mRes,String path){
         StringBuilder result=new StringBuilder();
         try{

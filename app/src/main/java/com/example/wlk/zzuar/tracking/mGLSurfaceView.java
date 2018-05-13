@@ -5,16 +5,29 @@ import android.graphics.RectF;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.example.wlk.zzuar.utils.ObjViewDistributor;
 
 
 public class mGLSurfaceView extends GLSurfaceView {
+    public class ObjInfo{
+        public String objname;
+        public RectF location;
+        public int lifetime;
+
+    }
     /**
     * 需要绘制的位置框信息，包含位置信息和时间戳（时间戳是为了让３Ｄ模型显示一会儿）
     */
-    private java.util.Queue<android.util.Pair<RectF,Integer>> objList ;
+    private java.util.Queue<ObjInfo> objList ;
+    private ObjViewDistributor distributor;
 
+    public ObjViewDistributor getDistributor() {
+        return distributor;
+    }
+
+    public void setDistributor(ObjViewDistributor distributor) {
+        this.distributor = distributor;
+    }
 
     public mGLSurfaceView(Context context) {
         super(context);
@@ -26,8 +39,8 @@ public class mGLSurfaceView extends GLSurfaceView {
         objList = new java.util.LinkedList<>();
     }
 
-    public java.util.Queue<android.util.Pair<RectF,Integer>> getObjList() {
-        java.util.Queue<android.util.Pair<RectF,Integer>> result = new java.util.LinkedList<>();
+    public java.util.Queue<ObjInfo> getObjList() {
+        java.util.Queue<ObjInfo> result = new java.util.LinkedList<>();
         synchronized(objList){
             while(!objList.isEmpty()){
                 result.add(objList.remove());
@@ -37,14 +50,14 @@ public class mGLSurfaceView extends GLSurfaceView {
         return result;
     }
 
-    public void setObjList(java.util.Queue<android.util.Pair<RectF,Integer>> objs){
+    public void setObjList(java.util.Queue<ObjInfo> objs){
         while(!objList.isEmpty()){
             objList.remove(0);
         }
         objList.addAll(objs);
     }
 
-    public synchronized void addObjList(android.util.Pair<RectF,Integer> trackedPos) {
+    public synchronized void addObjList(ObjInfo trackedPos) {
         if(objList!=null){
             objList.add(trackedPos);
         }else objList = new java.util.LinkedList<>();

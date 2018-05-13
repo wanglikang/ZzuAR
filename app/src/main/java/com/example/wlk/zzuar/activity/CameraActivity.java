@@ -48,9 +48,7 @@ import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.example.wlk.zzuar.R;
-import com.example.wlk.zzuar.obj.Obj3D;
 import com.example.wlk.zzuar.obj.ObjFilter;
-import com.example.wlk.zzuar.obj.ObjReader;
 import com.example.wlk.zzuar.tf.CameraConnectionFragment;
 import com.example.wlk.zzuar.tf.LegacyCameraConnectionFragment;
 import com.example.wlk.zzuar.tf.OverlayView;
@@ -59,9 +57,9 @@ import com.example.wlk.zzuar.tf.util.Logger;
 import com.example.wlk.zzuar.tracking.mGLSurfaceView;
 import com.example.wlk.zzuar.utils.Gl2Utils;
 
-import java.io.IOException;
+
 import java.nio.ByteBuffer;
-import java.util.Arrays;
+import java.util.Map;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -91,9 +89,11 @@ public abstract class CameraActivity extends Activity
     private Runnable postInferenceCallback;
     private Runnable imageConverter;
     public mGLSurfaceView mGLView;
-    private ObjFilter mFilter;
 
-    private Obj3D obj;
+//    private ObjViewDistributor distributor;
+    private GLGod god;
+
+//    private Obj3D obj;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -110,14 +110,19 @@ public abstract class CameraActivity extends Activity
 
         mGLView.setZOrderOnTop(true);
 
-        mFilter = new ObjFilter(getResources());
-        obj = new Obj3D();
-        try {
-            ObjReader.read(getAssets().open("3dres/hat.obj"), obj);
-            mFilter.setObj3D(obj);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        distributor = new ObjViewDistributor(this);
+//
+//        ObjViewDistributor distributor  = new ObjViewDistributor(this);
+//        mGLView.setDistributor(distributor);
+//
+//        obj = new Obj3D();
+//        try {
+//            ObjReader.read(getAssets().open("3dres/hat.obj"), obj);
+//            mFilter.setObj3D(obj);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+
         mGLView.setRenderer(new GLSurfaceView.Renderer() {
             public float height;
             public float width;
@@ -127,19 +132,34 @@ public abstract class CameraActivity extends Activity
                     0f, 0f, 0f,
                     0f, 0f, 1f
             };
+            public float[] objCameraMatrix=new float[16];
+            public float[] objProjMatrix=new float[16];
+            public float[] objMatrix=new float[16];
 
 
             @Override
             public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-                mFilter.create();
+
                 Log.i("learning", "mFilter.create()");
                 GLES20.glEnable(GLES20.GL_DEPTH_TEST);
                 gl.glClearColor(0, 0, 0, 0);
-                Matrix.setLookAtM(mFilter.getCameraMatrix(), 0,
+
+                Map<String,ObjFilter> filter = mGLView.getDistributor().getFilterMap();
+                for (Map.Entry<String,ObjFilter> i :filter.entrySet()) {
+                    Matrix.setLookAtM(i.getValue().getCameraMatrix(), 0,
                             lookAtMatrix[0],lookAtMatrix[1],lookAtMatrix[2],
                             lookAtMatrix[3],lookAtMatrix[4],lookAtMatrix[5],
                             lookAtMatrix[6],lookAtMatrix[7],lookAtMatrix[8]);
-//
+                }
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+//                Matrix.setLookAtM(mFilter.getCameraMatrix(), 0,
+//                            lookAtMatrix[0],lookAtMatrix[1],lookAtMatrix[2],
+//                            lookAtMatrix[3],lookAtMatrix[4],lookAtMatrix[5],
+//                            lookAtMatrix[6],lookAtMatrix[7],lookAtMatrix[8]);
+////
 //                        0, 10, 0,
 //                        0f, 0f, 0f,
 //                        0, 0, 1);
@@ -152,10 +172,22 @@ public abstract class CameraActivity extends Activity
                 Log.i("glview", "onSurfaceChanged:" + this.width + ":" + this.height);
                 this.ratio = this.width / this.height;
 
-                Matrix.frustumM(mFilter.getProjMatrix(), 0,
-                        -this.ratio , this.ratio,
-                        -1 , 1 ,
-                        1, 1000);
+
+                Map<String,ObjFilter> filter = mGLView.getDistributor().getFilterMap();
+                for (Map.Entry<String,ObjFilter> i :filter.entrySet()) {
+                    Matrix.frustumM(i.getValue().getCameraMatrix(),
+                            0,
+                            -this.ratio , this.ratio,
+                            -1 , 1 ,
+                            1, 1000);
+
+                }
+
+////////////////////////////////////////////////////////////////////////
+//                Matrix.frustumM(mFilter.getProjMatrix(), 0,
+//                        -this.ratio , this.ratio,
+//                        -1 , 1 ,
+//                        1, 1000);
 //              Matrix.orthoM(mFilter.getProjMatrix(),0 ,
 //                      -this.ratio, this.ratio,
 //                      -1f, 1f,
@@ -167,27 +199,28 @@ public abstract class CameraActivity extends Activity
 
             @Override
             public void onDrawFrame(GL10 gl) {
-                java.util.Queue<android.util.Pair<RectF, Integer>> objlists = mGLView.getObjList();
-                float[] oldMatrix = Arrays.copyOf(mFilter.getMatrix(), 16);
+                java.util.Queue<mGLSurfaceView.ObjInfo> objlists = mGLView.getObjList();
                 Log.i("learning", "objlists.size():" + objlists.size());
-                mFilter.clearView();
+
 //                mFilter.pushMatrix();
 //                mFilter.draw();
 //                mFilter.popMatrix();
                 if (objlists != null && objlists.size() > 0) {
                     float midx;
-                    float midz ;
+                    float midz;
                     float boxwidth;
                     float boxheight;
                     float dx;
                     float dz;
-
-                    for (android.util.Pair<RectF, Integer> p : objlists) {
-                        RectF f = p.first;
-                        int timestmp = p.second;
+                    ObjFilter currFilter;
+                    for (mGLSurfaceView.ObjInfo p : objlists) {
+                        RectF f = p.location;
+                        int timestmp = p.lifetime;
                         if (timestmp > 1) {
                             Log.i("learning", f.toString() + ":" + timestmp);
-                            mGLView.addObjList(new android.util.Pair<RectF, Integer>(f, timestmp - 1));
+                            p.lifetime--;
+
+                            mGLView.addObjList(p);
                         } else continue;
 
 
@@ -198,40 +231,36 @@ public abstract class CameraActivity extends Activity
                         boxwidth = f.right - f.left;
                         boxheight = f.bottom - f.top;
 
-                        Log.i("info", "mid:"+midx+":"+midz);
-                        Log.i("info", "box:"+boxwidth+":"+boxheight);
+                        Log.i("info", "mid:" + midx + ":" + midz);
+                        Log.i("info", "box:" + boxwidth + ":" + boxheight);
 
-                        dx = midx-this.width / 2  ;
-                        dz = midz-this.height / 2;
-                        Log.i("info", "dd:"+dx+":"+dz);
+                        dx = midx - this.width / 2;
+                        dz = midz - this.height / 2;
+                        Log.i("info", "dd:" + dx + ":" + dz);
                         float y = lookAtMatrix[1];
 
-                        float translateX = dx/this.width*y/1.0f*2;
-                        float translateZ = dz/this.height*y/1.0f*2;
-                        if(dx>0){
-                            translateX = 0-translateX;
+                        float translateX = dx / this.width * y / 1.0f * 2;
+                        float translateZ = dz / this.height * y / 1.0f * 2;
+                        if (dx > 0) {
+                            translateX = 0 - translateX;
                         }
-                        if(dz<0){
-                            translateZ = 0-translateZ;
+                        if (dz < 0) {
+                            translateZ = 0 - translateZ;
                         }
                         Log.i("info", "translateX:" + translateX + ";" + "translateZ:" + translateZ);
+                        currFilter = mGLView.getDistributor().getMatchClassName("hat");
 
-                        mFilter.pushMatrix();
+                        currFilter.pushMatrix();
 
 //                        Matrix.translateM(mFilter.getMatrix(), 0, translateX, 0f, translateZ);
-                        Matrix.translateM(mFilter.getMatrix(), 0, translateX, 0f, translateZ);
-                        Matrix.scaleM(mFilter.getMatrix(), 0, 0.4f, 0.4f * ratio, 0.4f);
-                        mFilter.draw();
-                        mFilter.popMatrix();
-
+                        Matrix.translateM(currFilter.getMatrix(), 0, translateX, 0f, translateZ);
+                        Matrix.scaleM(currFilter.getMatrix(), 0, 0.4f, 0.4f * ratio, 0.4f);
+                        currFilter.draw();
+                        currFilter.popMatrix();
                     }
-
                 }
-
-
             }
         });
-
 
         if (hasPermission()) {
             setFragment();
@@ -243,10 +272,14 @@ public abstract class CameraActivity extends Activity
     }
 
     public void reSurfaceChanged(int width, int height) {
-        mFilter.onSizeChanged(width, height);
-        float[] matrix = Gl2Utils.getOriginalMatrix();
-        Matrix.scaleM(matrix, 0, 0.8f, 0.8f * width / height, 0.8f);
-        mFilter.setMatrix(matrix);
+        Map<String,ObjFilter> filter = mGLView.getDistributor().getFilterMap();
+        for (Map.Entry<String,ObjFilter> i :filter.entrySet()) {
+            i.getValue().onSizeChanged(width, height);
+            float[] matrix = Gl2Utils.getOriginalMatrix();
+            Matrix.scaleM(matrix, 0, 0.8f, 0.8f * width / height, 0.8f);
+            i.getValue().setMatrix(matrix);
+        }
+
     }
 
     private byte[] lastPreviewFrame;
