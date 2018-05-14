@@ -9,6 +9,7 @@ import android.widget.Button;
 
 import com.example.wlk.zzuar.R;
 import com.example.wlk.zzuar.obj.ObjLoadActivity;
+import com.example.wlk.zzuar.obj.ObjLoadActivity2;
 
 public class MainChooceActivity extends AppCompatActivity {
 
@@ -28,7 +29,7 @@ public class MainChooceActivity extends AppCompatActivity {
         bt1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(context, ObjLoadActivity.class);
+                Intent intent = new Intent(context, ObjLoadActivity2.class);
                 startActivity(intent);
             }
         });

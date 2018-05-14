@@ -6,6 +6,7 @@ import android.opengl.Matrix;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 import com.example.wlk.zzuar.R;
 import com.example.wlk.zzuar.utils.Gl2Utils;
@@ -49,6 +50,7 @@ public class ObjLoadActivity2 extends AppCompatActivity {
 
             @Override
             public void onSurfaceChanged(GL10 gl, int width, int height) {
+                Log.i("3dobj", "obj size is:"+filters.size());
                 for (ObjFilter2 f:filters){
                     f.onSizeChanged(width, height);
                     float[] matrix= Gl2Utils.getOriginalMatrix();

@@ -48,7 +48,9 @@ import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.example.wlk.zzuar.R;
+import com.example.wlk.zzuar.obj.GLGod;
 import com.example.wlk.zzuar.obj.ObjFilter;
+import com.example.wlk.zzuar.obj.VisibObj;
 import com.example.wlk.zzuar.tf.CameraConnectionFragment;
 import com.example.wlk.zzuar.tf.LegacyCameraConnectionFragment;
 import com.example.wlk.zzuar.tf.OverlayView;
@@ -59,6 +61,7 @@ import com.example.wlk.zzuar.utils.Gl2Utils;
 
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Map;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -92,6 +95,8 @@ public abstract class CameraActivity extends Activity
 
 //    private ObjViewDistributor distributor;
     private GLGod god;
+    private VisibObj vobj1;
+    private VisibObj vobj2;
 
 //    private Obj3D obj;
 
@@ -109,6 +114,8 @@ public abstract class CameraActivity extends Activity
         mGLView.getHolder().setFormat(PixelFormat.TRANSLUCENT);
 
         mGLView.setZOrderOnTop(true);
+
+        god = GLGod.getTHEGod(this);
 
 //        distributor = new ObjViewDistributor(this);
 //
@@ -139,20 +146,21 @@ public abstract class CameraActivity extends Activity
 
             @Override
             public void onSurfaceCreated(GL10 gl, EGLConfig config) {
+                god.initGod();
+                GLES20.glClearColor(0f, 0f, 0f, 0f);
 
+                vobj1 = new VisibObj("hat").bindGod(god);
+                vobj2 = new VisibObj("hat2").bindGod(god);
+                vobj1.setObjNameAndReadObj("hat");
+                vobj2.setObjNameAndReadObj("hat");
                 Log.i("learning", "mFilter.create()");
-                GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-                gl.glClearColor(0, 0, 0, 0);
+                // GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+                //gl.glClearColor(0, 0, 0, 0);
 
-                Map<String,ObjFilter> filter = mGLView.getDistributor().getFilterMap();
-                for (Map.Entry<String,ObjFilter> i :filter.entrySet()) {
-                    Matrix.setLookAtM(i.getValue().getCameraMatrix(), 0,
-                            lookAtMatrix[0],lookAtMatrix[1],lookAtMatrix[2],
-                            lookAtMatrix[3],lookAtMatrix[4],lookAtMatrix[5],
-                            lookAtMatrix[6],lookAtMatrix[7],lookAtMatrix[8]);
-                }
-
-
+                    Matrix.setLookAtM(god.getCameraMatrix(), 0,
+                            lookAtMatrix[0], lookAtMatrix[1], lookAtMatrix[2],
+                            lookAtMatrix[3], lookAtMatrix[4], lookAtMatrix[5],
+                            lookAtMatrix[6], lookAtMatrix[7], lookAtMatrix[8]);
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 //                Matrix.setLookAtM(mFilter.getCameraMatrix(), 0,
@@ -173,21 +181,12 @@ public abstract class CameraActivity extends Activity
                 this.ratio = this.width / this.height;
 
 
-                Map<String,ObjFilter> filter = mGLView.getDistributor().getFilterMap();
-                for (Map.Entry<String,ObjFilter> i :filter.entrySet()) {
-                    Matrix.frustumM(i.getValue().getCameraMatrix(),
+                Matrix.frustumM(god.getProjMatrix(),
                             0,
                             -this.ratio , this.ratio,
                             -1 , 1 ,
                             1, 1000);
-
-                }
-
-////////////////////////////////////////////////////////////////////////
-//                Matrix.frustumM(mFilter.getProjMatrix(), 0,
-//                        -this.ratio , this.ratio,
-//                        -1 , 1 ,
-//                        1, 1000);
+///////////////////////////////////////////////////////////////////////
 //              Matrix.orthoM(mFilter.getProjMatrix(),0 ,
 //                      -this.ratio, this.ratio,
 //                      -1f, 1f,
@@ -205,6 +204,14 @@ public abstract class CameraActivity extends Activity
 //                mFilter.pushMatrix();
 //                mFilter.draw();
 //                mFilter.popMatrix();
+                god.clearView();
+//                VisibObj obj = god.getVisibobjs().get("hat");
+//                obj.pushMatrix();
+//                //Matrix.translateM(obj.getMatrix(), 0, translateX, 0f, translateZ);
+//                Matrix.scaleM(obj.getMatrix(), 0, 0.4f, 0.4f, 0.4f);
+//                obj.requestDraw();
+//                obj.popMatrix();
+
                 if (objlists != null && objlists.size() > 0) {
                     float midx;
                     float midz;
@@ -212,7 +219,8 @@ public abstract class CameraActivity extends Activity
                     float boxheight;
                     float dx;
                     float dz;
-                    ObjFilter currFilter;
+//                    ObjFilter currFilter;
+                    VisibObj obj;
                     for (mGLSurfaceView.ObjInfo p : objlists) {
                         RectF f = p.location;
                         int timestmp = p.lifetime;
@@ -239,8 +247,8 @@ public abstract class CameraActivity extends Activity
                         Log.i("info", "dd:" + dx + ":" + dz);
                         float y = lookAtMatrix[1];
 
-                        float translateX = dx / this.width * y / 1.0f * 2;
-                        float translateZ = dz / this.height * y / 1.0f * 2;
+                        float translateX = dx / this.width * y / 1.0f*2 ;
+                        float translateZ = dz / this.height * y / 1.0f*2;
                         if (dx > 0) {
                             translateX = 0 - translateX;
                         }
@@ -248,15 +256,21 @@ public abstract class CameraActivity extends Activity
                             translateZ = 0 - translateZ;
                         }
                         Log.i("info", "translateX:" + translateX + ";" + "translateZ:" + translateZ);
-                        currFilter = mGLView.getDistributor().getMatchClassName("hat");
 
-                        currFilter.pushMatrix();
-
-//                        Matrix.translateM(mFilter.getMatrix(), 0, translateX, 0f, translateZ);
-                        Matrix.translateM(currFilter.getMatrix(), 0, translateX, 0f, translateZ);
-                        Matrix.scaleM(currFilter.getMatrix(), 0, 0.4f, 0.4f * ratio, 0.4f);
-                        currFilter.draw();
-                        currFilter.popMatrix();
+                        obj = god.getVisibobjs().get("hat");
+                        obj.pushMatrix();
+                        Matrix.translateM(obj.getMatrix(), 0, translateX, 0f, translateZ);
+                        Matrix.scaleM(obj.getMatrix(), 0, 0.4f, 0.4f * ratio, 0.4f);
+                        obj.requestDraw();
+                        obj.popMatrix();
+//                        currFilter = mGLView.getDistributor().getMatchClassName("hat");
+//                        currFilter.pushMatrix();
+//
+////                        Matrix.translateM(mFilter.getMatrix(), 0, translateX, 0f, translateZ);
+//                        Matrix.translateM(currFilter.getMatrix(), 0, translateX, 0f, translateZ);
+//                        Matrix.scaleM(currFilter.getMatrix(), 0, 0.4f, 0.4f * ratio, 0.4f);
+//                        currFilter.draw();
+//                        currFilter.popMatrix();
                     }
                 }
             }
@@ -272,13 +286,15 @@ public abstract class CameraActivity extends Activity
     }
 
     public void reSurfaceChanged(int width, int height) {
-        Map<String,ObjFilter> filter = mGLView.getDistributor().getFilterMap();
-        for (Map.Entry<String,ObjFilter> i :filter.entrySet()) {
-            i.getValue().onSizeChanged(width, height);
-            float[] matrix = Gl2Utils.getOriginalMatrix();
-            Matrix.scaleM(matrix, 0, 0.8f, 0.8f * width / height, 0.8f);
-            i.getValue().setMatrix(matrix);
-        }
+        god.onSizeChanged(width,height);
+//
+//        Map<String,ObjFilter> filter = mGLView.getDistributor().getFilterMap();
+//        for (Map.Entry<String,ObjFilter> i :filter.entrySet()) {
+//            i.getValue().onSizeChanged(width, height);
+//            float[] matrix = Gl2Utils.getOriginalMatrix();
+//            Matrix.scaleM(matrix, 0, 0.8f, 0.8f * width / height, 0.8f);
+//            i.getValue().setMatrix(matrix);
+//        }
 
     }
 

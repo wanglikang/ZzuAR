@@ -8,6 +8,7 @@ import android.opengl.GLUtils;
 import android.opengl.Matrix;
 import android.util.SparseArray;
 
+import com.example.wlk.zzuar.utils.Gl2Utils;
 import com.example.wlk.zzuar.utils.MatrixUtils;
 import com.example.wlk.zzuar.utils.ObjUtil;
 
@@ -15,8 +16,13 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
-class GLGod {
+public class GLGod {
     private static final String TAG ="GLGod" ;
     private static Context context;
     private static GLGod THEGod=null;
@@ -94,6 +100,8 @@ class GLGod {
     private SparseArray<float[]> mFloats;
     private int mHNormal;
 
+
+    private Map<String,VisibObj> visibobjs  = new HashMap<>();
     public Context getContext() {
         return context;
     }
@@ -117,11 +125,14 @@ class GLGod {
     private GLGod(Context context){
         this.context = context;
         this.mRes = context.getResources();
-        initGod();
+        /**
+         * 将初始化分开进行
+         */
+       // initGod();
 
     }
 
-    private void initGod(){
+    public void initGod(){
         initBuffer();
         createProgramByAssetsFile("3dres/obj.vert","3dres/obj.frag");
         mHNormal= GLES20.glGetAttribLocation(mProgram,"vNormal");
@@ -239,7 +250,26 @@ class GLGod {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
     }
 
-    protected void onSizeChanged(int width, int height) {
+    public void onSizeChanged(int width, int height) {
         GLES20.glViewport(0,0,width,height);
+
+        Iterator<Map.Entry<String, VisibObj>> iter = getVisibobjs().entrySet().iterator();
+        while(iter.hasNext()){
+            float[] matrix = Gl2Utils.getOriginalMatrix();
+            Matrix.scaleM(matrix, 0, 0.8f, 0.8f * width / height, 0.8f);
+            iter.next().getValue().setMatrix(matrix);
+        }
+
+    }
+    public void addVisibObj(String name,VisibObj obj){
+        visibobjs.put(name, obj);
+    }
+
+    public void setVisibobjs(Map<String, VisibObj> visibobjs) {
+        this.visibobjs = visibobjs;
+    }
+
+    public Map<String, VisibObj> getVisibobjs() {
+        return visibobjs;
     }
 }

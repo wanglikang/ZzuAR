@@ -9,33 +9,47 @@ import com.example.wlk.zzuar.utils.MatrixUtils;
 import com.example.wlk.zzuar.utils.ObjUtil;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Stack;
 
 public class VisibObj {
     private Obj3D bindObj;
     private GLGod god ;
-    public String objName;
+    public String className;
+    private String modelName;
     public static Context context;
     private float[] matrix= MatrixUtils.getOriginalMatrix();
     private int textureId=0;
+    /**
+     * 此栈用于保存位置矩阵使用
+     */
+    private Stack<float[]> matrixStack;
 
-    public VisibObj(GLGod god){
+    public VisibObj(String className){
+        this.className = className;
+        matrixStack = new Stack<float[]>();
+    }
+    public VisibObj bindGod(GLGod god){
         this.god = god;
         this.context = god.getContext();
+        this.god.addVisibObj(className,this);
+        return this;
     }
 
-    public void setObjNameAndReadObj(String name){
-        this.objName = name;
+    public void setObjNameAndReadObj(String modelName){
+        this.modelName = modelName;
         bindObj = new Obj3D();
+        //ObjReader.read(context.getAssets().open("3dres/hat.obj"),bindObj);
         try {
-            //ObjReader.read(context.getAssets().open("3dres/hat.obj"),bindObj);
-            ObjReader.read(context.getAssets().open("3dres/"+name+".obj"),bindObj);
-            Log.i("3dobj", "load .obj from "+name);
+            ObjReader.read(context.getAssets().open("3dres/"+modelName+".obj"),bindObj);
         } catch (IOException e) {
             e.printStackTrace();
         }
+        //ObjReader.readMultiObj(context,"assets/3dres/pikachu.obj");
+        Log.i("3dobj", "load .obj from "+modelName);
         if(bindObj.vertTexture!=null){
             try {
-                Log.i("3dobj", "start to load Texture for:"+name);
+                Log.i("3dobj", "start to load Texture for class:"+className+":with modelName:"+modelName);
                 textureId= ObjUtil.createTexture(BitmapFactory.decodeStream(ObjUtil.mRes.getAssets().open("3dres/"+bindObj.mtl.map_Kd)));
             } catch (IOException e) {
                 e.printStackTrace();
@@ -65,5 +79,18 @@ public class VisibObj {
 
     public void setMatrix(float[] matrix) {
         this.matrix = matrix;
+    }
+
+
+    public float[] popMatrix(){
+        float[] peekele = matrixStack.peek();
+        for(int i = 0;i<16;i++){
+            this.matrix[i] = peekele[i];
+        }
+        return matrixStack.pop();
+    }
+    public void pushMatrix(){
+        float[] pushEle = Arrays.copyOf(this.matrix, 16);
+        matrixStack.push(pushEle);
     }
 }
