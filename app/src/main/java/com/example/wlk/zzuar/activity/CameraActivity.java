@@ -150,9 +150,9 @@ public abstract class CameraActivity extends Activity
                 GLES20.glClearColor(0f, 0f, 0f, 0f);
 
                 vobj1 = new VisibObj("hat").bindGod(god);
-                vobj2 = new VisibObj("hat2").bindGod(god);
+                vobj2 = new VisibObj("pikachu").bindGod(god);
                 vobj1.setObjNameAndReadObj("hat");
-                vobj2.setObjNameAndReadObj("hat");
+                vobj2.setObjNameAndReadObj("pikachu");
                 Log.i("learning", "mFilter.create()");
                 // GLES20.glEnable(GLES20.GL_DEPTH_TEST);
                 //gl.glClearColor(0, 0, 0, 0);
@@ -221,7 +221,9 @@ public abstract class CameraActivity extends Activity
                     float dz;
 //                    ObjFilter currFilter;
                     VisibObj obj;
+                    int i = 0;
                     for (mGLSurfaceView.ObjInfo p : objlists) {
+                        i++;
                         RectF f = p.location;
                         int timestmp = p.lifetime;
                         if (timestmp > 1) {
@@ -257,10 +259,15 @@ public abstract class CameraActivity extends Activity
                         }
                         Log.i("info", "translateX:" + translateX + ";" + "translateZ:" + translateZ);
 
-                        obj = god.getVisibobjs().get("hat");
+                        if(i%2==0)
+                            obj = god.getVisibobjs().get("hat");
+                        else obj = god.getVisibobjs().get("pikachu");
                         obj.pushMatrix();
                         Matrix.translateM(obj.getMatrix(), 0, translateX, 0f, translateZ);
-                        Matrix.scaleM(obj.getMatrix(), 0, 0.4f, 0.4f * ratio, 0.4f);
+
+                        if(obj.getClassName().equals("pikachu"))
+                            Matrix.scaleM(obj.getMatrix(), 0, 0.01f, 0.01f * ratio, 0.01f);
+                        else Matrix.scaleM(obj.getMatrix(), 0, 0.4f, 0.4f * ratio, 0.4f);
                         obj.requestDraw();
                         obj.popMatrix();
 //                        currFilter = mGLView.getDistributor().getMatchClassName("hat");

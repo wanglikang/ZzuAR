@@ -19,6 +19,7 @@ import java.nio.ShortBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -221,11 +222,13 @@ public class GLGod {
 
 
     public void drawObj(VisibObj visibobj){
-        Obj3D obj = visibobj.getBindObj();
-        onUseProgram();
-        onSetExpandData(visibobj);
-        onBindTexture(visibobj);
-        onDraw(obj);
+        List<Obj3D> obj = visibobj.getBindObjs();
+        for(Obj3D o:obj) {
+            onUseProgram();
+            onSetExpandData(visibobj);
+            onBindTexture(visibobj);
+            onDraw(o);
+        }
     }
     public float[] getFinalMatrix(float[] matrix){
         finalMatrix = new float[16];

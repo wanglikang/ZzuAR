@@ -9,11 +9,13 @@ import com.example.wlk.zzuar.utils.MatrixUtils;
 import com.example.wlk.zzuar.utils.ObjUtil;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Stack;
 
 public class VisibObj {
-    private Obj3D bindObj;
+    private List<Obj3D> bindObjs;
     private GLGod god ;
     public String className;
     private String modelName;
@@ -36,25 +38,33 @@ public class VisibObj {
         return this;
     }
 
+    public String getClassName() {
+        return className;
+    }
+
     public void setObjNameAndReadObj(String modelName){
         this.modelName = modelName;
-        bindObj = new Obj3D();
         //ObjReader.read(context.getAssets().open("3dres/hat.obj"),bindObj);
-        try {
-            ObjReader.read(context.getAssets().open("3dres/"+modelName+".obj"),bindObj);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        //ObjReader.readMultiObj(context,"assets/3dres/pikachu.obj");
-        Log.i("3dobj", "load .obj from "+modelName);
-        if(bindObj.vertTexture!=null){
+        //    ObjReader.read(context.getAssets().open("3dres/"+modelName+".obj"),bindObj);
+        bindObjs = ObjReader.readMultiObj(context,"assets/3dres/"+modelName+".obj");
+        if(bindObjs.size()==0){
             try {
-                Log.i("3dobj", "start to load Texture for class:"+className+":with modelName:"+modelName);
-                textureId= ObjUtil.createTexture(BitmapFactory.decodeStream(ObjUtil.mRes.getAssets().open("3dres/"+bindObj.mtl.map_Kd)));
+                ObjReader.readObj(context.getAssets().open("3dres/"+modelName+".obj"),bindObjs);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+        //ObjReader.readMultiObj(context,"assets/3dres/pikachu.obj");
+        Log.i("3dobj", "load .obj from "+modelName);
+
+//        if(bindObj.vertTexture!=null){
+//            try {
+//                Log.i("3dobj", "start to load Texture for class:"+className+":with modelName:"+modelName);
+//                textureId= ObjUtil.createTexture(BitmapFactory.decodeStream(ObjUtil.mRes.getAssets().open("3dres/"+bindObj.mtl.map_Kd)));
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
     }
 
     public void requestDraw(){
@@ -65,8 +75,8 @@ public class VisibObj {
         requestDraw();
     }
 
-    public Obj3D getBindObj() {
-        return bindObj;
+    public List<Obj3D> getBindObjs() {
+        return bindObjs;
     }
 
     public int getTextureId() {

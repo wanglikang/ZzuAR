@@ -20,6 +20,76 @@ import java.util.Map;
 
 public class ObjReader {
 
+    public static void readObj(InputStream stream,List<Obj3D> obj3Ds){
+        Obj3D obj = new Obj3D();
+        ArrayList<Float> alv=new ArrayList<Float>();//原始顶点坐标列表
+        ArrayList<Float> alvResult=new ArrayList<Float>();//结果顶点坐标列表
+        ArrayList<Float> norlArr=new ArrayList<>();
+        float[] ab=new float[3],bc=new float[3],norl=new float[3];
+        try{
+            InputStreamReader isr=new InputStreamReader(stream);
+            BufferedReader br=new BufferedReader(isr);
+            String temps=null;
+            while((temps=br.readLine())!=null)
+            {
+                String[] tempsa=temps.split("[ ]+");
+                if(tempsa[0].trim().equals("v")) {//此行为顶点坐标
+                    alv.add(Float.parseFloat(tempsa[1]));
+                    alv.add(Float.parseFloat(tempsa[2]));
+                    alv.add(Float.parseFloat(tempsa[3]));
+                }  else if(tempsa[0].trim().equals("f")) {//此行为三角形面
+                    int a=Integer.parseInt(tempsa[1])-1;
+                    int b=Integer.parseInt(tempsa[2])-1;
+                    int c=Integer.parseInt(tempsa[3])-1;
+                    int d=Integer.parseInt(tempsa[4])-1;
+                    //abc和acd两个三角形组成的四边形
+
+                    alvResult.add(alv.get(a*3));
+                    alvResult.add(alv.get(a*3+1));
+                    alvResult.add(alv.get(a*3+2));
+                    alvResult.add(alv.get(b*3));
+                    alvResult.add(alv.get(b*3+1));
+                    alvResult.add(alv.get(b*3+2));
+                    alvResult.add(alv.get(c*3));
+                    alvResult.add(alv.get(c*3+1));
+                    alvResult.add(alv.get(c*3+2));
+
+                    alvResult.add(alv.get(a*3));
+                    alvResult.add(alv.get(a*3+1));
+                    alvResult.add(alv.get(a*3+2));
+                    alvResult.add(alv.get(c*3));
+                    alvResult.add(alv.get(c*3+1));
+                    alvResult.add(alv.get(c*3+2));
+                    alvResult.add(alv.get(d*3));
+                    alvResult.add(alv.get(d*3+1));
+                    alvResult.add(alv.get(d*3+2));
+
+                    //用面法向量策略。按理说点法向量更适合这种光滑的3D模型，但是计算起来太复杂了，so
+                    //既然主要讲3D模型加载，就先用面法向量策略来吧
+                    //通常3D模型里面会包含法向量信息的。
+                    //法向量的计算，ABC三个空间点，他们的法向量为向量AB与向量BC的外积，所以有：
+                    for (int i=0;i<3;i++){
+                        ab[i]=alv.get(a*3+i)-alv.get(b*3+i);
+                        bc[i]=alv.get(b*3+i)-alv.get(c*3+i);
+                    }
+                    norl[0]=ab[1]*bc[2]-ab[2]*bc[1];
+                    norl[1]=ab[2]*bc[0]-ab[0]*bc[2];
+                    norl[2]=ab[0]*bc[1]-ab[1]*bc[0];
+                    for (int i=0;i<6;i++){
+                        norlArr.add(norl[0]);
+                        norlArr.add(norl[1]);
+                        norlArr.add(norl[2]);
+                    }
+                }
+            }
+            obj.setVert(alvResult);
+            obj.setVertNorl(norlArr);
+            obj3Ds.add(obj);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
     public static void read(InputStream stream,Obj3D obj3D){
         ArrayList<Float> alv=new ArrayList<Float>();//原始顶点坐标列表
         ArrayList<Float> alvResult=new ArrayList<Float>();//结果顶点坐标列表
@@ -115,6 +185,7 @@ public class ObjReader {
                 parent=file.substring(0,file.lastIndexOf("/")+1);
                 inputStream=new FileInputStream(file);
             }
+            //读取pikachu.obj文件
             InputStreamReader isr=new InputStreamReader(inputStream);
             BufferedReader br=new BufferedReader(isr);
             String temps;
@@ -125,6 +196,7 @@ public class ObjReader {
                     String[] tempsa=temps.split("[ ]+");
                     switch (tempsa[0].trim()){
                         case "mtllib":  //材质
+                            //读取pikachu.mtl材质文件
                             InputStream stream;
                             if (isAssets){
                                 stream=context.getAssets().open(parent+tempsa[1]);
