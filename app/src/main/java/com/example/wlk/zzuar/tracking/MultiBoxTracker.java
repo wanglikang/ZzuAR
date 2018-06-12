@@ -218,9 +218,9 @@ public class MultiBoxTracker {
             getFrameToCanvasMatrix().mapRect(trackedPos);
 
 
-//            敲击屏幕才画框
+//            敲击屏幕才画框//还是加上框吧
 
-          if(glview.getIsShowRect()) {
+//          if(glview.getIsShowRect()) {
               boxPaint.setColor(recognition.color);
               final float cornerSize = Math.min(trackedPos.width(), trackedPos.height()) / 8.0f;
               canvas.drawRoundRect(trackedPos, cornerSize, cornerSize, boxPaint);
@@ -229,7 +229,7 @@ public class MultiBoxTracker {
                       : String.format("%.2f", recognition.detectionConfidence);
               borderedText.drawText(canvas, trackedPos.left + cornerSize, trackedPos.bottom, "title is:" + labelString);
 
-          }
+//          }
             mGLSurfaceView.ObjInfo objInfo  = glview.new ObjInfo();
             objInfo.lifetime = 20;
             objInfo.location = trackedPos;

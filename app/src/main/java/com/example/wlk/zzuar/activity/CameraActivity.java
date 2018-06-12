@@ -49,6 +49,7 @@ import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.example.wlk.zzuar.R;
+import com.example.wlk.zzuar.myapp;
 import com.example.wlk.zzuar.obj.GLGod;
 import com.example.wlk.zzuar.obj.ObjFilter;
 import com.example.wlk.zzuar.obj.VisibObj;
@@ -98,6 +99,8 @@ public abstract class CameraActivity extends Activity
     private GLGod god;
     private VisibObj vobj1;
     private VisibObj vobj2;
+    private VisibObj vobj3;
+    private VisibObj vobj4;
 
 //    private Obj3D obj;
 
@@ -152,8 +155,19 @@ public abstract class CameraActivity extends Activity
 
                 vobj1 = new VisibObj("hat").bindGod(god);
                 vobj2 = new VisibObj("pikachu").bindGod(god);
-                vobj1.setObjNameAndReadObj("hat");
-                vobj2.setObjNameAndReadObj("pikachu");
+                vobj3 = new VisibObj("file").bindGod(god);
+                vobj4 = new VisibObj("cup").bindGod(god);
+                runInBackground(new Runnable() {
+                    @Override
+                    public void run() {
+                        vobj1.setObjNameAndReadObj("hat");
+                        vobj2.setObjNameAndReadObj("pikachu");
+                        vobj4.setObjNameAndReadObj("cup");
+                        vobj3.setObjNameAndReadObj("file");
+                        Toast.makeText(myapp.getContext(), "加载obj模型完成", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
                 Log.i("learning", "mFilter.create()");
                 // GLES20.glEnable(GLES20.GL_DEPTH_TEST);
                 //gl.glClearColor(0, 0, 0, 0);
@@ -188,7 +202,7 @@ public abstract class CameraActivity extends Activity
                             -1 , 1 ,
                             1, 1000);
 ///////////////////////////////////////////////////////////////////////
-//              Matrix.orthoM(mFilter.getProjMatrix(),0 ,
+//              Matrix.orthoM(god.getProjMatrix(),0 ,
 //                      -this.ratio, this.ratio,
 //                      -1f, 1f,
 //                      1f, 1000f);
@@ -260,9 +274,14 @@ public abstract class CameraActivity extends Activity
                         }
                         Log.i("info", "translateX:" + translateX + ";" + "translateZ:" + translateZ);
 
-                        if(i%2==0)
+                        if(p.objname.equals("laptop"))
+                            obj = god.getVisibobjs().get("file");
+                        else if(p.objname.equals("cup"))
+                            obj = god.getVisibobjs().get("cup");
+                        else if(i%2==0)
                             obj = god.getVisibobjs().get("hat");
                         else obj = god.getVisibobjs().get("pikachu");
+
                         obj.pushMatrix();
                         Matrix.translateM(obj.getMatrix(), 0, translateX, 0f, translateZ);
 
