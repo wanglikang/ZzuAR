@@ -44,6 +44,7 @@ import android.util.Log;
 import android.util.Size;
 import android.view.KeyEvent;
 import android.view.Surface;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 
@@ -648,6 +649,8 @@ public abstract class CameraActivity extends Activity
 
     public void onSetDebug(final boolean debug) {
     }
+
+
 
     @Override
     public boolean onKeyDown(final int keyCode, final KeyEvent event) {

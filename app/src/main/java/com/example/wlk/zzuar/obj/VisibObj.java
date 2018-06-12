@@ -65,6 +65,7 @@ public class VisibObj {
 //                e.printStackTrace();
 //            }
 //        }
+
     }
 
     public void requestDraw(){

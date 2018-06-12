@@ -4,11 +4,26 @@ import android.content.Context;
 import android.graphics.RectF;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.View;
+import android.widget.Toast;
 
+import com.example.wlk.zzuar.myapp;
 import com.example.wlk.zzuar.utils.ObjViewDistributor;
 
 
-public class mGLSurfaceView extends GLSurfaceView {
+public class mGLSurfaceView extends GLSurfaceView implements GLSurfaceView.OnClickListener{
+    private boolean isShowRect = false;
+    @Override
+    public void onClick(View v) {
+        Toast.makeText(myapp.getContext(), "GlSurefaceView clicked", Toast.LENGTH_SHORT).show();
+        Log.i("gl", "GlSurefaceView clicked");
+        isShowRect = !isShowRect;
+    }
+    public boolean getIsShowRect(){
+        return isShowRect;
+    }
+
     public class ObjInfo{
         public String objname;
         public RectF location;

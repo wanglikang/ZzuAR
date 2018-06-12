@@ -49,7 +49,11 @@ import java.util.Queue;
 public class MultiBoxTracker {
     private final Logger logger = new Logger();
     private mGLSurfaceView glview;
+    private boolean isShowRect = false;
 
+    public void setShowRect(boolean isshow){
+        this.isShowRect = isshow;
+    }
     private static final float TEXT_SIZE_DIP = 18;
 
     // Maximum percentage of a box that can be overlapped by another box at detection time. Otherwise
@@ -191,20 +195,20 @@ public class MultiBoxTracker {
                 false);
         Log.i("learning", "MultiBoxTracker -draw()-trackedObjects");
 /////////////////////////////////////////////////
-        final RectF rf = new RectF();
-        rf.set(20.f, 30f, 100f, 200f);
-        getFrameToCanvasMatrix().mapRect(rf);
-
-        final float cornerSize2 = Math.min(rf.width(), rf.height()) / 8.0f;
-        boxPaint.setColor(COLORS[3]);
-        canvas.drawRoundRect(rf, cornerSize2, cornerSize2, boxPaint);
-        borderedText.drawText(canvas, rf.left + cornerSize2, rf.bottom, "fake OBJ");
-        mGLSurfaceView.ObjInfo objInfotemp  = glview.new ObjInfo();
-        objInfotemp.lifetime = 20;
-        objInfotemp.location = rf;
-        objInfotemp.objname = "hat";
-        glview.addObjList(objInfotemp);
-
+//        final RectF rf = new RectF();
+//        rf.set(20.f, 30f, 100f, 200f);
+//        getFrameToCanvasMatrix().mapRect(rf);
+//
+//        final float cornerSize2 = Math.min(rf.width(), rf.height()) / 8.0f;
+//        boxPaint.setColor(COLORS[3]);
+//        canvas.drawRoundRect(rf, cornerSize2, cornerSize2, boxPaint);
+//        borderedText.drawText(canvas, rf.left + cornerSize2, rf.bottom, "fake OBJ");
+//        mGLSurfaceView.ObjInfo objInfotemp  = glview.new ObjInfo();
+//        objInfotemp.lifetime = 20;
+//        objInfotemp.location = rf;
+//        objInfotemp.objname = "hat";
+//        glview.addObjList(objInfotemp);
+//添加对一个ＦＡＫＥ框
 //////////////////////////////
         for (final TrackedRecognition recognition : trackedObjects) {
             final RectF trackedPos = (objectTracker != null)
@@ -212,10 +216,20 @@ public class MultiBoxTracker {
                     : new RectF(recognition.location);
 
             getFrameToCanvasMatrix().mapRect(trackedPos);
-            boxPaint.setColor(recognition.color);
 
-            final float cornerSize = Math.min(trackedPos.width(), trackedPos.height()) / 8.0f;
-            canvas.drawRoundRect(trackedPos, cornerSize, cornerSize, boxPaint);
+
+//            敲击屏幕才画框
+
+          if(glview.getIsShowRect()) {
+              boxPaint.setColor(recognition.color);
+              final float cornerSize = Math.min(trackedPos.width(), trackedPos.height()) / 8.0f;
+              canvas.drawRoundRect(trackedPos, cornerSize, cornerSize, boxPaint);
+              final String labelString = !TextUtils.isEmpty(recognition.title)
+                      ? String.format("%s %.2f", recognition.title, recognition.detectionConfidence)
+                      : String.format("%.2f", recognition.detectionConfidence);
+              borderedText.drawText(canvas, trackedPos.left + cornerSize, trackedPos.bottom, "title is:" + labelString);
+
+          }
             mGLSurfaceView.ObjInfo objInfo  = glview.new ObjInfo();
             objInfo.lifetime = 20;
             objInfo.location = trackedPos;
@@ -224,11 +238,6 @@ public class MultiBoxTracker {
             android.util.Pair<RectF, Integer> p = new android.util.Pair<>(trackedPos, 20);
             glview.addObjList(objInfo);
 
-
-            final String labelString = !TextUtils.isEmpty(recognition.title)
-                    ? String.format("%s %.2f", recognition.title, recognition.detectionConfidence)
-                    : String.format("%.2f", recognition.detectionConfidence);
-            borderedText.drawText(canvas, trackedPos.left + cornerSize, trackedPos.bottom, "title is:" + labelString);
         }
     }
 

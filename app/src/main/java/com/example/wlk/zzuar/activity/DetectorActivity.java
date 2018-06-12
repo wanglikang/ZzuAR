@@ -26,10 +26,12 @@ import android.graphics.Paint.Style;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.media.ImageReader.OnImageAvailableListener;
+import android.opengl.GLSurfaceView;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.Size;
 import android.util.TypedValue;
+import android.view.View;
 import android.widget.Toast;
 
 import com.example.wlk.zzuar.tf.Classifier;
@@ -84,6 +86,14 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     private static final String YOLO_INPUT_NAME = "input";
     private static final String YOLO_OUTPUT_NAMES = "output";
     private static final int YOLO_BLOCK_SIZE = 32;
+    private boolean isShowRect = false;
+
+//    @Override
+//    public void onClick(View v) {
+//        isShowRect = !isShowRect;
+//        Toast.makeText(this, "detectoractivity  clicked", Toast.LENGTH_SHORT).show();
+//        this.tracker.setShowRect(isShowRect);
+//    }
 
     // Which detection model to use: by default uses Tensorflow Object Detection API frozen
     // checkpoints.  Optionally use legacy Multibox (trained using an older version of the API)
@@ -92,8 +102,8 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         TF_OD_API, MULTIBOX, YOLO;
     }
 
-    //private static final DetectorMode MODE = DetectorMode.TF_OD_API;
-    private static final DetectorMode MODE = DetectorMode.YOLO;//用于设置所用的检测模型类
+    private static final DetectorMode MODE = DetectorMode.TF_OD_API;
+    //private static final DetectorMode MODE = DetectorMode.YOLO;//用于设置所用的检测模型类
 
     // Minimum detection confidence to track a detection.
     private static final float MINIMUM_CONFIDENCE_TF_OD_API = 0.6f;
